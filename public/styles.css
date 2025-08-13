@@ -1,0 +1,30 @@
+body {
+    font-family: sans-serif;
+    padding: 10px;
+    width: 380px;
+}
+
+.section {
+    margin-bottom: 12px;
+}
+
+.box {
+    background: #ded8d8;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: pre-wrap;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.red {
+    color: #e44a52;
+}
+
+.green {
+    color: #5ec962;
+}

@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "TnC Summarizer",
+    "description": "A Chrome extension that summarizes terms and conditions.",
+    "version": "1.0",
+    "permissions": [
+        "activeTab","scripting", "storage"
+    ],
+    "host_permissions": [
+      "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "public/popup.html",
+        "default_icon": {
+            "16" : "public/icons/icon.png",
+            "48" : "public/icons/icon.png",
+            "128" : "public/icons/icon.png"
+        }
+    }
+}
