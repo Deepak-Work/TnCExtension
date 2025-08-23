@@ -6,48 +6,44 @@ function parseSections(text) {
         greenFlags: ''
     };
 
-    const lines = text.split('\n');
-    let current = null;
+    const regex = /(\d\.\s*\*\*.*?\*\*):?\s*([\s\S]*?)(?=\n\d\.|\s*$)/g;
+    let match;
 
-    for (let line of lines) {
-        line = line.trim();
+    while ((match = regex.exec(text)) !== null) {
+        const header = match[1].toLowerCase();
+        const content = match[2].trim();
 
-        if (line.toLowerCase().startsWith('1.')) {
-            current = 'important';
-            continue
-        }
-        else if (line.toLowerCase().startsWith('2.')) {
-            current = 'obligations';
-            continue
-        }
-        else if (line.toLowerCase().startsWith('3.')) {
-            current = 'redFlags';
-            continue
-        }
-        else if (line.toLowerCase().startsWith('4.')) {
-            current = 'greenFlags';
-            continue
-        }
-        
-        if (current && line) {
-            sections[current] += line + '\n';
+        if (header.includes("important")) {
+            sections.important = content;
+        } else if (header.includes("obligations")) {
+            sections.obligations = content;
+        } else if (header.includes("red flags")) {
+            sections.redFlags = content;
+        } else if (header.includes("green flags")) {
+            sections.greenFlags = content;
         }
     }
-        return sections;
+
+    return sections;
 }
+
 
 
 chrome.storage.local.get('tncSummary', (data) => {
     const container = data.tncSummary;
 
     if(!container) {
-        document.getElementById("important").innerText = "No important points found.";
+        document.getElementById("important").innerText = "None important points found.";
         return;
     }
+
+    console.log("Loaded summary from storage:", container);
 
     document.getElementById("url").innerText = container.url;
 
     const parsed = parseSections(container.summary);
+
+    console.log("Parsed sections:", parsed);
 
     document.getElementById("important").innerText = parsed.important || "No important points found.";
     document.getElementById("obligations").innerText = parsed.obligations || "No obligations found.";
