@@ -25,10 +25,6 @@ def summarize_tnc(text: str) -> str:
     Please clearly separate each section by starting with 1.,2.,3.,4. and provide a concise summary.
     Text: {text}"""
 
-    print(prompt)
-
-    print('------------------------------------')
-
     if LLM_PROVIDER == "gemini":
         model = genai.GenerativeModel(gemini_model)
         response = model.generate_content(prompt)

@@ -1,26 +1,29 @@
-function extractTermsText() {
-    const keywords = ['terms', 'conditions', 'agreement', 'policy', 'contract', 'privacy'];
-    const text = document.body.innerText.toLowerCase();
+(async () => {
+    const { loadConfig } = await import(chrome.runtime.getURL("configLoader.js"));
+    const config = await loadConfig();
+    const crawlEndpoint = config.crawlEndPoint;
 
-    const matchFound = keywords.some(keyword => text.includes(keyword));
-
-    if (!matchFound) return null;
-
-    const paragraphs = Array.from(document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, div'));
-    const likelyTnc = paragraphs
-            .filter(p => p.innerText.length > 100)
-            .map(p => p.innerText.trim())
-            .join('\n\n')
-            .slice(0, 20000); // Limit to 20000 characters //TODO: How to handle larger texts?
-
-    return likelyTnc;
-}
-
-const tncText = extractTermsText();
-if (tncText) {
-    chrome.runtime.sendMessage({ 
-        action: 'tnc_detected', 
-        text: tncText,
-        sourceUrl: window.location.href,
-     });
+    async function fetchParsedTerms(url) {
+        try{
+            console.log(`${crawlEndpoint}?url=${encodeURIComponent(url)}`)
+            const res = await fetch(`${crawlEndpoint}?url=${encodeURIComponent(url)}`);
+            const json = await res.json();
+            return json || "";
+        } catch (error) {
+            console.error("Crawl4AI Fetch Failed: ", error);
+        }
     }
+
+    function initialize() {
+        currentUrl = window.location.href;
+        fetchParsedTerms(currentUrl).then((text) => {
+            if (text){
+                chrome.runtime.sendMessage({action: 'tncTextExtracted', text: text, sourceUrl: currentUrl});
+            } else {
+                console.warn("No TnC text extracted!");
+            }
+        });
+    }
+    initialize();
+})();
+

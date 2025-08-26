@@ -1,0 +1,4 @@
+{
+    "crawlEndPoint": "http://localhost:8081/parse",
+    "summarizerEndPoint": "http://localhost:8001/summarize"
+}

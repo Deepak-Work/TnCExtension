@@ -14,6 +14,8 @@ app.add_middleware(
 async def summarize(request: Request):
     body = await request.json()
     text = body.get("text", "")
+    # print(f"Received text for summarization: {text}") 
+
     result = summarize_tnc(text)
 
     return {"summary": result}
