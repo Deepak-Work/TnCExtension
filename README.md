@@ -20,7 +20,13 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 cp .env.example .env #Edit your API keys here
-uvicorn main:app --reload --port 8000
+
+cd ../Parser
+pip install -r requirements.txt
+
+cd ../.
+chmod +x run-dev.sh #Modify port number in config.json if needed; 8081 by default
+./run-dev.sh
 ```
 
 ### 3. Load the Chrome Extension
