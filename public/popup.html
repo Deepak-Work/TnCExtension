@@ -3,33 +3,39 @@
     <head>
         <title>Terms and Conditions Summary</title>
         <link rel="stylesheet" href="styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     </head>
     <body>
-        <div class = "section">
-            <div class = "label"> Page:</div>
-            <div id = "url" class = "box"></div>
-        </div>
+        <div class="container">
+            <h1 class="title">Terms Summary</h1>
+            
+            <div class="section">
+                <div class="label">Page URL</div>
+                <div id="url" class="box"></div>
+            </div>
 
-        <div class = "section">
-            <div class = "label"> Important Points:</div>
-            <div id = "important" class = "box"></div>
-        </div>
+            <div class="section">
+                <div class="label">Important Points</div>
+                <div id="important" class="box"></div>
+            </div>
 
-        <div class = "section">
-            <div class = "label"> User Obligations: </div>
-            <div id = "obligations" class = "box"></div>
-        </div>
+            <div class="section">
+                <div class="label">User Obligations</div>
+                <div id="obligations" class="box"></div>
+            </div>
 
-        <div class = "section">
-            <div class = "label"> Red Flags: </div>
-            <div id = "redFlags" class = "box"></div>
-        </div>
+            <div class="section">
+                <div class="label">Red Flags</div>
+                <div id="redFlags" class="box warning"></div>
+            </div>
 
-        <div class = "section">
-            <div class = "label"> Green Flags: </div>
-            <div id = "greenFlags" class = "box"></div>
+            <div class="section">
+                <div class="label">Green Flags</div>
+                <div id="greenFlags" class="box success"></div>
+            </div>
         </div>
-
         <script src="../popup.js"></script>
     </body>
 </html>
