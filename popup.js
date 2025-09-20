@@ -3,7 +3,8 @@ function parseSections(text) {
         important: '',
         obligations: '',
         redFlags: '',
-        greenFlags: ''
+        greenFlags: '',
+        reviews: ''
     };
 
     const regex = /(\d\.\s*\*\*.*?\*\*):?\s*([\s\S]*?)(?=\n\d\.|\s*$)/g;
@@ -21,6 +22,8 @@ function parseSections(text) {
             sections.redFlags = content;
         } else if (header.includes("green flags")) {
             sections.greenFlags = content;
+        } else if (header.includes("what people say")) {
+            sections.reviews = content;
         }
     }
 
@@ -40,7 +43,7 @@ function updatePopupContent() {
 
         if(!container) {
             document.getElementById("url").innerText = "Analyzing new page...";
-            document.getElementById("important").innerText = "No important points found.";
+            document.getElementById("important").innerHTML = "No important points found.";
             showLoading(false);
             return;
         }
@@ -51,16 +54,38 @@ function updatePopupContent() {
                 document.getElementById("url").innerText = container.url;
                 const parsed = parseSections(container.summary);
 
-                document.getElementById("important").innerText = parsed.important || "No important points found.";
-                document.getElementById("obligations").innerText = parsed.obligations || "No obligations found.";
-                document.getElementById("redFlags").innerText = parsed.redFlags || "No red flags found.";
-                document.getElementById("greenFlags").innerText = parsed.greenFlags || "No green flags found.";
+                // Use innerHTML instead of innerText for formatted content
+                document.getElementById("important").innerHTML = `<ul>${formatMarkdown(parsed.important)}</ul>` || "No important points found.";
+                document.getElementById("obligations").innerHTML = `<ul>${formatMarkdown(parsed.obligations)}</ul>` || "No obligations found.";
+                document.getElementById("redFlags").innerHTML = `<ul>${formatMarkdown(parsed.redFlags)}</ul>` || "No red flags found.";
+                document.getElementById("greenFlags").innerHTML = `<ul>${formatMarkdown(parsed.greenFlags)}</ul>` || "No green flags found.";
+                document.getElementById("reviews").innerHTML = `<ul>${formatMarkdown(parsed.reviews)}</ul>` || "No user reviews found.";
             } else {
                 document.getElementById("url").innerText = "Analyzing new page...";
             }
             showLoading(false);
         });
     });
+}
+
+function formatMarkdown(text) {
+    if (!text) return '';
+    
+    return text.split('\n')
+        .map(line => {
+            line = line.trim();
+            // Look specifically for hyphen bullet points
+            if (line.startsWith('-')) {
+                // Remove the hyphen and trim whitespace
+                line = line.substring(1).trim();
+                // Convert bold text marked with **
+                line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                return `<li>${line}</li>`;
+            }
+            return line;
+        })
+        .filter(line => line) // Remove empty lines
+        .join('\n');
 }
 
 // Initial load

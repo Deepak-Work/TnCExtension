@@ -61,6 +61,37 @@ body {
     border-left: 4px solid var(--success-color);
 }
 
+.box.reviews {
+    border-left: 4px solid #8b5cf6;  /* Purple accent for reviews */
+}
+
+.box ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.box li {
+    position: relative;
+    padding-left: 1.2em;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.box li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.box strong {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
 /* Hover effects */
 .box:hover {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -103,6 +134,40 @@ body {
     border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
+}
+
+.review-quote {
+    font-style: italic;
+    margin: 8px 0;
+    padding-left: 12px;
+    border-left: 2px solid var(--border-color);
+}
+
+.review-source {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.custom-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-list li {
+    position: relative;
+    padding-left: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.5;
+}
+
+.custom-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0.5em;
+    color: var(--primary-color);
+    font-size: 1em;
 }
 
 @keyframes spin {

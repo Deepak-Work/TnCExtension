@@ -16,13 +16,21 @@ elif LLM_PROVIDER == "openai":
 
 
 def summarize_tnc(text: str) -> str:
-    prompt = f"""Summarize the following Terms and Conditions text:
-    1. Important points to note
-    2. Key obligations of the user
-    3. Red flags or any potential risks or liabilities
-    4. Green flags or good points for the user
+    prompt = f"""Analyze the following Terms and Conditions text and provide a summary in the following format:
 
-    Please clearly separate each section by starting with 1.,2.,3.,4. and provide a concise summary.
+1. **Important points to note**:
+   [List key points]
+2. **Key obligations of the user**:
+   [List obligations]
+3. **Red flags or any potential risks or liabilities**:
+   [List concerns]
+4. **Green flags or good points for the user**:
+   [List benefits]
+5. **What people say**:
+   [Summarize user sentiments and cite 2-4 representative reviews. Include both positive and negative perspectives with sources if available]
+
+
+    Please clearly separate each section by starting with 1.,2.,3.,4.,5. and provide a concise bulleted (markdown style, use - for bullet) summary.
     Text: {text}"""
 
     if LLM_PROVIDER == "gemini":
