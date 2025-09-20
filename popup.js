@@ -27,26 +27,53 @@ function parseSections(text) {
     return sections;
 }
 
+function showLoading(show = true) {
+    document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
+    document.getElementById('content').style.display = show ? 'none' : 'block';
+}
 
+function updatePopupContent() {
+    showLoading(true);
+    
+    chrome.storage.local.get('tncSummary', (data) => {
+        const container = data.tncSummary;
 
-chrome.storage.local.get('tncSummary', (data) => {
-    const container = data.tncSummary;
+        if(!container) {
+            document.getElementById("url").innerText = "Analyzing new page...";
+            document.getElementById("important").innerText = "No important points found.";
+            showLoading(false);
+            return;
+        }
 
-    if(!container) {
-        document.getElementById("important").innerText = "None important points found.";
-        return;
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const currentTab = tabs[0];
+            if (currentTab.url === container.url) {
+                document.getElementById("url").innerText = container.url;
+                const parsed = parseSections(container.summary);
+
+                document.getElementById("important").innerText = parsed.important || "No important points found.";
+                document.getElementById("obligations").innerText = parsed.obligations || "No obligations found.";
+                document.getElementById("redFlags").innerText = parsed.redFlags || "No red flags found.";
+                document.getElementById("greenFlags").innerText = parsed.greenFlags || "No green flags found.";
+            } else {
+                document.getElementById("url").innerText = "Analyzing new page...";
+            }
+            showLoading(false);
+        });
+    });
+}
+
+// Initial load
+document.addEventListener('DOMContentLoaded', updatePopupContent);
+
+// Listen for summary updates from background script
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'summaryUpdated') {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            const currentTab = tabs[0];
+            if (currentTab.url === message.data.url) {
+                updatePopupContent();
+            }
+        });
     }
-
-    console.log("Loaded summary from storage:", container);
-
-    document.getElementById("url").innerText = container.url;
-
-    const parsed = parseSections(container.summary);
-
-    console.log("Parsed sections:", parsed);
-
-    document.getElementById("important").innerText = parsed.important || "No important points found.";
-    document.getElementById("obligations").innerText = parsed.obligations || "No obligations found.";
-    document.getElementById("redFlags").innerText = parsed.redFlags || "No red flags found.";
-    document.getElementById("greenFlags").innerText = parsed.greenFlags || "No green flags found.";
 });

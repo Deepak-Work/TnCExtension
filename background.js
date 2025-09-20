@@ -26,6 +26,15 @@ loadConfig().then(config => {
                         summary: data.summary,
                         timestamp: new Date().toISOString(),
                     }
+                }, () => {
+                    // Notify all open popups about the update
+                    chrome.runtime.sendMessage({
+                        action: 'summaryUpdated',
+                        data: {
+                            url: sourceUrl,
+                            summary: data.summary
+                        }
+                    });
                 });
             })
             .catch(error => {
