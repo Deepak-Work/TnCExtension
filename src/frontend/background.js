@@ -1,4 +1,4 @@
-import  { loadConfig } from "./configLoader.js";
+import { loadConfig } from "../../config/configLoader.js";
 
 
 loadConfig().then(config => {

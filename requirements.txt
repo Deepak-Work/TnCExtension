@@ -3,3 +3,6 @@ uvicorn
 python-dotenv
 google-generative-ai
 openai
+crawl4ai
+beautifulsoup4
+httpx

@@ -1,1 +1,17 @@
+# Python cache files
+__pycache__/
+*.pyc
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual Environment
+venv/
 .env
+
+# IDE specific files
+.vscode/
+.DS_Store

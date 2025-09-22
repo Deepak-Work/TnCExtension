@@ -1,5 +1,5 @@
 (async () => {
-    const { loadConfig } = await import(chrome.runtime.getURL("configLoader.js"));
+    const { loadConfig } = await import(chrome.runtime.getURL("config/configLoader.js"));
     const config = await loadConfig();
     const crawlEndpoint = config.crawlEndPoint;
 
