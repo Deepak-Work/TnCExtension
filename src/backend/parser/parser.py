@@ -75,7 +75,7 @@ def extract_relevant_text(text: str) -> str:
 
         if any(kw in low for kw in keywords) and not any(bkw in low for bkw in boilerplate_keywords):
             # keep tables always, keep text if not too tiny
-            if is_table or len(block) > 0:
+            if is_table or len(block) > 100:
                 candidates.append(block)
 
     return "\n\n".join(candidates) if candidates else text.strip()

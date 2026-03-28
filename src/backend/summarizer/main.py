@@ -1,5 +1,7 @@
+import traceback
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from llm_wrapper import summarize_tnc
 
 app = FastAPI()
@@ -16,6 +18,10 @@ async def summarize(request: Request):
     text = body.get("text", "")
     # print(f"Received text for summarization: {text}") 
 
-    result = summarize_tnc(text)
+    try:
+        result = summarize_tnc(text)
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
     return {"summary": result}

@@ -15,6 +15,6 @@ app.add_middleware(
 async def parse_tnc_page(url: str = Query(..., description="The URL of the TnC page")):
     try:
         content = await extract_terms_text(url)
-        return {"text": content}
+        return content
     except Exception as e:
         return {"error": str(e)}

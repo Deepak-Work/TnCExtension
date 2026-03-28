@@ -8,7 +8,7 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER","gemini")
 if LLM_PROVIDER == "gemini":
     import google.generativeai as genai
     genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-    gemini_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash-latest")
+    gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 elif LLM_PROVIDER == "openai":
     import openai
     openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -31,10 +31,13 @@ def summarize_tnc(text: str) -> str:
         print(response.text)
         return response.text
     elif LLM_PROVIDER == "openai":
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model=openai_model,
             messages=[{"role": "user", "content": prompt}]
         )
-        return response.choices[0].message.content.strip()
+        result = response.choices[0].message.content.strip()
+        if not any(marker in result for marker in ['1.', '2.', '3.', '4.']):
+            raise ValueError("LLM returned unexpected format")
+        return result
     else:
         raise ValueError("Unsupported LLM provider specified.")

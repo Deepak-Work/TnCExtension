@@ -1,29 +1,33 @@
 (async () => {
-    const { loadConfig } = await import(chrome.runtime.getURL("config/configLoader.js"));
-    const config = await loadConfig();
-    const crawlEndpoint = config.crawlEndPoint;
+    const TNC_KEYWORDS = ['terms', 'privacy', 'policy', 'conditions', 'agreement', 'legal'];
 
-    async function fetchParsedTerms(url) {
-        try{
-            console.log(`${crawlEndpoint}?url=${encodeURIComponent(url)}`)
-            const res = await fetch(`${crawlEndpoint}?url=${encodeURIComponent(url)}`);
-            const json = await res.json();
-            return json || "";
-        } catch (error) {
-            console.error("Crawl4AI Fetch Failed: ", error);
+    function isTncPage() {
+        const haystack = (window.location.href + ' ' + document.title).toLowerCase();
+        return TNC_KEYWORDS.some(kw => haystack.includes(kw));
+    }
+
+    async function initialize() {
+        const currentUrl = window.location.href;
+
+        if (!isTncPage()) {
+            console.log("Not a TnC page, skipping.");
+            return;
         }
+
+        // Check cache — skip cache if previous result was an error
+        const stored = await new Promise(resolve => chrome.storage.local.get('tncSummary', resolve));
+        const cached = stored.tncSummary;
+        if (cached && !cached.error && cached.url && cached.url.split('#')[0] === currentUrl.split('#')[0] && cached.timestamp) {
+            const age = Date.now() - new Date(cached.timestamp).getTime();
+            if (age < 30 * 60 * 1000) {
+                console.log("Using cached summary.");
+                return;
+            }
+        }
+
+        // Ask background to fetch & summarize (background is immune to page CSP)
+        chrome.runtime.sendMessage({ action: 'fetchAndSummarise', url: currentUrl });
     }
 
-    function initialize() {
-        currentUrl = window.location.href;
-        fetchParsedTerms(currentUrl).then((text) => {
-            if (text){
-                chrome.runtime.sendMessage({action: 'tncTextExtracted', text: text, sourceUrl: currentUrl});
-            } else {
-                console.warn("No TnC text extracted!");
-            }
-        });
-    }
     initialize();
 })();
-
