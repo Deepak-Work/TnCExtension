@@ -1,49 +1,77 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Terms and Conditions Summary</title>
+        <title>Fine Print</title>
         <link rel="stylesheet" href="styles.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
     </head>
     <body>
-        <div id="loading-screen" class="loading-container">
+        <div id="loading-screen" class="state-box">
             <div class="spinner"></div>
-            <p>Analyzing Terms & Conditions...</p>
+            <p>Reviewing terms and conditions&hellip;</p>
         </div>
 
-        <div id="empty-screen" class="loading-container" style="display: none;">
-            <p>No Terms & Conditions detected on this page yet.</p>
+        <div id="empty-screen" class="state-box" style="display: none;">
+            <p>No terms &amp; conditions detected on this page yet.</p>
         </div>
 
-        <div id="content" class="container" style="display: none;">
-            <h1 class="title" id="page-title">Terms Summary</h1>
+        <div id="error-screen" class="state-box" style="display: none;">
+            <div class="error-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+            </div>
+            <p>Couldn't reach the analysis service.<br>Make sure the local backend is running.</p>
+        </div>
 
-            <div class="section">
-                <div class="label">Page URL</div>
-                <div id="url" class="box"></div>
+        <div id="content" class="popup" style="display: none;">
+            <div class="p-header">
+                <div class="p-brand">
+                    <div class="p-mark">
+                        <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6M9 16h6" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="p-wordmark">Fine Print</div>
+                </div>
+                <div id="source-pill" class="pill"></div>
             </div>
 
-            <div id="error-message" class="box warning" style="display: none;"></div>
-
-            <div class="section">
-                <div class="label">Good for you</div>
-                <div id="good" class="box success"></div>
+            <div class="p-subject">
+                <h1 id="subject"></h1>
+                <div id="url" class="p-url"></div>
             </div>
 
-            <div class="section">
-                <div class="label">Red flags</div>
-                <div id="bad" class="box warning"></div>
+            <div class="p-body">
+                <div>
+                    <div class="section-eyebrow eyebrow-good">
+                        <span class="eyebrow-dot"></span> Key Benefits
+                        <span id="good-count" class="eyebrow-count"></span>
+                    </div>
+                    <ul id="good" class="item-list"></ul>
+                </div>
+
+                <hr class="divider">
+
+                <div>
+                    <div class="section-eyebrow eyebrow-risk">
+                        <span class="eyebrow-dot"></span> Risk Factors
+                        <span id="bad-count" class="eyebrow-count"></span>
+                    </div>
+                    <ul id="bad" class="item-list"></ul>
+                </div>
+
+                <hr class="divider">
+
+                <div>
+                    <div class="section-eyebrow eyebrow-sentiment">
+                        <span class="eyebrow-dot"></span> Public Sentiment
+                    </div>
+                    <ul id="sentiment" class="item-list"></ul>
+                </div>
             </div>
 
-            <div class="section">
-                <div class="label">What people are saying</div>
-                <div id="sentiment" class="box"></div>
-            </div>
-
-            <div class="section">
-                <div id="meta" class="box" style="font-size: 12px; color: #64748b;"></div>
+            <div class="p-footer">
+                <span id="analyzed-at"></span>
+                <span id="model"></span>
             </div>
         </div>
         <script src="../popup.js" type="module"></script>

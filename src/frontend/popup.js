@@ -1,60 +1,75 @@
+const GOOD_ICON = `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#E8F5EC"/><path d="M5 8.2l2 2 4-4.4" stroke="#1B7A4A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const RISK_ICON = `<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#FBEAEA"/><path d="M8 5v4" stroke="#B3261E" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11" r="0.9" fill="#B3261E"/></svg>`;
+
 function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
 }
 
-function bulletList(items, emptyLabel) {
+function renderItemList(container, items, icon, emptyLabel) {
     if (!items || items.length === 0) {
-        return `<em style="color:#94a3b8;">${emptyLabel}</em>`;
+        container.innerHTML = `<li class="item-empty">${emptyLabel}</li>`;
+        return;
     }
-    return `<ul style="margin:0; padding-left:18px;">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
+    container.innerHTML = items.map(text => `
+        <li class="item">
+            <span class="item-icon">${icon}</span>
+            <span>${escapeHtml(text)}</span>
+        </li>
+    `).join('');
 }
 
-function sentimentList(items) {
+function renderSentimentList(container, items) {
     if (!items || items.length === 0) {
-        return `<em style="color:#94a3b8;">No web sentiment found.</em>`;
+        container.innerHTML = `<li class="item-empty">No web sentiment found.</li>`;
+        return;
     }
-    return items.map(s => `
-        <div style="margin-bottom:8px;">
-            "${escapeHtml(s.text)}" —
-            <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">source</a>
-        </div>
+    container.innerHTML = items.map(s => `
+        <li class="sentiment-item">
+            "${escapeHtml(s.text)}" — <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">source ↗</a>
+        </li>
     `).join('');
 }
 
 function showScreen(name) {
     document.getElementById('loading-screen').style.display = name === 'loading' ? 'flex' : 'none';
     document.getElementById('empty-screen').style.display = name === 'empty' ? 'flex' : 'none';
-    document.getElementById('content').style.display = name === 'content' ? 'block' : 'none';
+    document.getElementById('error-screen').style.display = name === 'error' ? 'flex' : 'none';
+    document.getElementById('content').style.display = name === 'content' ? 'flex' : 'none';
 }
 
 function render(data) {
     if (data.error) {
-        showScreen('content');
-        document.getElementById('page-title').innerText = 'Terms Summary';
-        document.getElementById('url').innerText = data.url || '';
-        document.getElementById('error-message').innerText =
-            'Could not connect to backend. Make sure the servers are running.';
-        document.getElementById('error-message').style.display = 'block';
-        document.getElementById('good').innerHTML = '';
-        document.getElementById('bad').innerHTML = '';
-        document.getElementById('sentiment').innerHTML = '';
-        document.getElementById('meta').innerText = '';
+        showScreen('error');
         return;
     }
 
     showScreen('content');
-    document.getElementById('error-message').style.display = 'none';
-    document.getElementById('page-title').innerText = data.title ? `Terms Summary: ${data.title}` : 'Terms Summary';
-    document.getElementById('url').innerText = data.url || '';
-    document.getElementById('good').innerHTML = bulletList(data.good, 'No notable upsides found.');
-    document.getElementById('bad').innerHTML = bulletList(data.bad, 'No red flags found.');
-    document.getElementById('sentiment').innerHTML = sentimentList(data.sentiment);
 
-    const sourceLabel = data.source === 'cache' ? 'Loaded from cache' : 'Freshly analyzed';
-    const analyzedAt = data.analyzedAt ? new Date(data.analyzedAt).toLocaleString() : '';
-    document.getElementById('meta').innerText = `${sourceLabel}${analyzedAt ? ' · ' + analyzedAt : ''}`;
+    const pill = document.getElementById('source-pill');
+    if (data.source === 'cache') {
+        pill.textContent = 'From Cache';
+        pill.className = 'pill pill-cache';
+    } else {
+        pill.textContent = 'Freshly Analyzed';
+        pill.className = 'pill pill-fresh';
+    }
+
+    document.getElementById('subject').innerText = data.subject || data.title || 'Terms & Conditions';
+    document.getElementById('url').innerText = data.url || '';
+
+    renderItemList(document.getElementById('good'), data.good, GOOD_ICON, 'No notable upsides found.');
+    renderItemList(document.getElementById('bad'), data.bad, RISK_ICON, 'No red flags found.');
+    document.getElementById('good-count').innerText = data.good?.length || '';
+    document.getElementById('bad-count').innerText = data.bad?.length || '';
+
+    renderSentimentList(document.getElementById('sentiment'), data.sentiment);
+
+    document.getElementById('analyzed-at').innerText = data.analyzedAt
+        ? `Analyzed ${new Date(data.analyzedAt).toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' })}`
+        : '';
+    document.getElementById('model').innerText = data.model || '';
 }
 
 async function updatePopupContent() {

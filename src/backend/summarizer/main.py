@@ -36,11 +36,13 @@ def _cached_row_to_response(row: dict, source: str) -> dict:
         "documentKey": row["document_key"],
         "url": row["url"],
         "title": row["title"],
+        "subject": row["subject"],
         "good": json.loads(row["good_json"]),
         "bad": json.loads(row["bad_json"]),
         "sentiment": json.loads(row["sentiment_json"]),
         "source": source,
         "analyzedAt": row["analyzed_at"],
+        "model": row["model_used"],
     }
 
 
