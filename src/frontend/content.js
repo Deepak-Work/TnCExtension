@@ -12,6 +12,10 @@
     const { showBanner } = await import(chrome.runtime.getURL('src/frontend/banner.js'));
 
     const TNC_KEYWORDS = ['terms', 'privacy', 'policy', 'conditions', 'agreement', 'legal'];
+    const SEARCH_ENGINE_HOSTS = [
+        'google.', 'bing.com', 'duckduckgo.com', 'search.yahoo.com',
+        'yandex.', 'baidu.com', 'ecosia.org', 'startpage.com',
+    ];
     const DIALOG_SELECTOR = [
         '[role="dialog"]', '[aria-modal="true"]', 'dialog',
         '[class*="modal" i]', '[class*="dialog" i]', '[id*="modal" i]', '[id*="dialog" i]',
@@ -28,9 +32,23 @@
     const accumulators = new WeakMap();
     const lastSentHash = new WeakMap();
 
+    // Only the path is checked (not the query string or <title>) - a search for
+    // "terms and conditions" on google.com/search?q=... would otherwise match on
+    // the query text alone, even though the page itself has no T&C content.
     function isFastPathTncPage() {
-        const haystack = (window.location.href + ' ' + document.title).toLowerCase();
-        return TNC_KEYWORDS.some(kw => haystack.includes(kw));
+        const path = window.location.pathname.toLowerCase();
+        return TNC_KEYWORDS.some(kw => path.includes(kw));
+    }
+
+    // Search result pages aggregate snippets from many unrelated documents, which
+    // can accidentally contain enough legal-sounding phrases to pass the keyword
+    // density check - so they're excluded outright rather than relying on scoring.
+    function isSearchResultsPage() {
+        const host = window.location.hostname.toLowerCase();
+        const path = window.location.pathname.toLowerCase();
+        const isSearchHost = SEARCH_ENGINE_HOSTS.some(h => host.includes(h));
+        if (!isSearchHost) return false;
+        return path.includes('search') || (path === '/' && window.location.search.length > 0);
     }
 
     function hasTrackedAncestor(node) {
@@ -136,7 +154,13 @@
     }
 
     function initialize() {
-        if (isFastPathTncPage()) {
+        if (isSearchResultsPage()) {
+            return;
+        }
+
+        // Require the URL to look like a T&C page AND the body content to actually
+        // score as one - a matching path alone (e.g. a blog post slug) isn't enough.
+        if (isFastPathTncPage() && isTncCandidate(extractAllText(document.body))) {
             trackRoot(document.body);
         } else {
             scanExistingDialogs();
