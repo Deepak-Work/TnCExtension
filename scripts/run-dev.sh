@@ -3,7 +3,7 @@
 # Load config file
 CONFIG_FILE="../config/config.json"
 CRAWL_PORT=$(jq -r '.crawlEndPoint' $CONFIG_FILE | grep -oE '[0-9]+')
-SERVER_PORT=$(jq -r '.summarizerEndPoint' $CONFIG_FILE | grep -oE '[0-9]+')
+SERVER_PORT=$(jq -r '.analyzeEndpoint' $CONFIG_FILE | grep -oE '[0-9]+')
 
 # Kill any existing processes on the required ports
 kill_port() {
