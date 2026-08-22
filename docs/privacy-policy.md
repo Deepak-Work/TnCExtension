@@ -1,6 +1,6 @@
 # Fine Print - Privacy Policy
 
-_Last updated: [DATE]_
+_Last updated: August 22, 2026_
 
 Fine Print ("the extension") helps you understand Terms & Conditions and Privacy Policy documents before you agree to them. This page explains what data the extension collects, why, and what we do with it.
 
@@ -50,4 +50,4 @@ We may update this policy as the extension changes. Material changes will be ref
 
 ## Contact
 
-Questions or data removal requests: [CONTACT EMAIL OR GITHUB ISSUES LINK]
+Questions or data removal requests: please open an issue at [github.com/Deepak-Work/TnCExtension/issues](https://github.com/Deepak-Work/TnCExtension/issues).
