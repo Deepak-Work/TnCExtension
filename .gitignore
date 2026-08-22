@@ -15,6 +15,10 @@ venv/
 # Local cache database
 src/backend/summarizer/data/
 
+# Extension signing key - private, controls the extension's identity/ID.
+# Losing it means losing the ability to publish updates under the same ID.
+extension-key.pem
+
 # IDE specific files
 .vscode/
 .DS_Store

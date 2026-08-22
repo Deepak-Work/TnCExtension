@@ -1,18 +1,34 @@
 import json
+import os
 import traceback
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 import db
 from llm_wrapper import summarize_tnc, LLM_PROVIDER
 from sentiment import get_sentiment
 
+# Comma-separated list of allowed origins, e.g. "chrome-extension://<published-id>".
+# Defaults to "*" for local development; set explicitly once the extension's
+# published ID is known so a random website can't call this API directly.
+ALLOWED_ORIGINS = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "*").split(",")]
+
+# Cache hits are free/cheap and stay unlimited; only real LLM calls are capped.
+DAILY_ANALYZE_BUDGET = int(os.getenv("DAILY_ANALYZE_BUDGET", "150"))
+
+limiter = Limiter(key_func=get_remote_address)
+
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your needs
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -71,7 +87,14 @@ def _friendly_error_message(e: Exception) -> str:
 
 
 @app.post("/analyze")
-async def analyze(body: AnalyzeRequest):
+@limiter.limit("10/hour")
+async def analyze(request: Request, body: AnalyzeRequest):
+    if db.increment_and_get_daily_analyze_count() > DAILY_ANALYZE_BUDGET:
+        return JSONResponse(
+            status_code=429,
+            content={"error": "This service is at capacity for today. Please try again tomorrow."},
+        )
+
     try:
         summary = summarize_tnc(body.text)
         sentiment = get_sentiment(summary["subject"])

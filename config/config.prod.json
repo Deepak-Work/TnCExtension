@@ -1,0 +1,4 @@
+{
+    "cacheCheckEndpoint": "https://fine-print-analyzer-336314479175.us-central1.run.app/cache/check",
+    "analyzeEndpoint": "https://fine-print-analyzer-336314479175.us-central1.run.app/analyze"
+}

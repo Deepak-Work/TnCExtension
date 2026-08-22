@@ -5,9 +5,6 @@ google-generativeai
 openai
 anthropic
 ddgs
-crawl4ai
-beautifulsoup4
-httpx
 psycopg[binary]
 psycopg_pool
 slowapi
