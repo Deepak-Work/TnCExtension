@@ -1,4 +1,5 @@
 {
     "crawlEndPoint": "http://localhost:8081/parse",
-    "summarizerEndPoint": "http://localhost:8001/summarize"
+    "cacheCheckEndpoint": "http://localhost:8001/cache/check",
+    "analyzeEndpoint": "http://localhost:8001/analyze"
 }

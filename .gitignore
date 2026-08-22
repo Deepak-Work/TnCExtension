@@ -12,6 +12,9 @@ build/
 venv/
 .env
 
+# Local cache database
+src/backend/summarizer/data/
+
 # IDE specific files
 .vscode/
 .DS_Store

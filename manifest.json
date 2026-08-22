@@ -4,7 +4,7 @@
     "description": "A Chrome extension that summarizes terms and conditions.",
     "version": "1.0",
     "permissions": [
-        "activeTab","scripting", "storage"
+        "activeTab","scripting", "storage", "notifications"
     ],
     "host_permissions": [
       "<all_urls>"

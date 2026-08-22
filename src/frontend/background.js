@@ -1,60 +1,99 @@
 import { loadConfig } from "../../config/configLoader.js";
 
+const notificationTabs = new Map();
+
 loadConfig().then(config => {
-    const crawlEndpoint = config.crawlEndPoint;
-    const summarizerEndPoint = config.summarizerEndPoint;
+    const cacheCheckEndpoint = config.cacheCheckEndpoint;
+    const analyzeEndpoint = config.analyzeEndpoint;
 
-    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-        if (msg.action === 'fetchAndSummarise') {
-            const sourceUrl = msg.url;
-            console.log('[Background] Fetching TnC for', sourceUrl);
+    async function fetchAnalysis(payload) {
+        const checkRes = await fetch(cacheCheckEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentKey: payload.documentKey, contentHash: payload.contentHash }),
+        });
+        if (!checkRes.ok) throw new Error(`Cache check returned ${checkRes.status}`);
+        const checkData = await checkRes.json();
+        if (checkData.hit) return checkData.analysis;
 
-            fetch(`${crawlEndpoint}?url=${encodeURIComponent(sourceUrl)}`)
-                .then(res => {
-                    if (!res.ok) throw new Error(`Parser returned ${res.status}`);
-                    return res.json();
-                })
-                .then(json => {
-                    const text = json.text || '';
-                    if (!text) throw new Error('No text extracted from page');
+        const analyzeRes = await fetch(analyzeEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!analyzeRes.ok) throw new Error(`Analyze returned ${analyzeRes.status}`);
+        return await analyzeRes.json();
+    }
 
-                    return fetch(summarizerEndPoint, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text }),
-                    });
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error(`Summarizer returned ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    chrome.storage.local.set({
-                        tncSummary: {
-                            url: sourceUrl,
-                            summary: data.summary,
-                            timestamp: new Date().toISOString(),
-                        }
-                    }, () => {
-                        chrome.runtime.sendMessage({
-                            action: 'summaryUpdated',
-                            data: { url: sourceUrl, summary: data.summary }
-                        }).catch(() => {});
-                    });
-                })
-                .catch(error => {
-                    console.error('[Background] Error:', error);
-                    chrome.storage.local.set({
-                        tncSummary: {
-                            url: sourceUrl,
-                            error: true,
-                            message: error.message || 'Backend unreachable',
-                            timestamp: new Date().toISOString(),
-                        }
-                    });
+    function setBadge(tabId, ok) {
+        chrome.action.setBadgeText({ tabId, text: ok ? '✓' : '!' });
+        chrome.action.setBadgeBackgroundColor({ tabId, color: ok ? '#22c55e' : '#ef4444' });
+    }
+
+    async function storeForTab(tabId, data) {
+        await chrome.storage.local.set({ [`tab:${tabId}`]: data });
+        chrome.runtime.sendMessage({ action: 'analysisUpdated', tabId, data }).catch(() => {});
+    }
+
+    function notify(tabId, analysis) {
+        const notificationId = `tnc-${tabId}-${Date.now()}`;
+        notificationTabs.set(notificationId, tabId);
+        chrome.notifications.create(notificationId, {
+            type: 'basic',
+            iconUrl: chrome.runtime.getURL('src/frontend/public/icons/icon.png'),
+            title: 'Terms Summary ready',
+            message: analysis.title ? `Analysis ready for ${analysis.title}` : 'Analysis ready for this page.',
+        });
+    }
+
+    chrome.runtime.onMessage.addListener((msg, sender) => {
+        if (msg.action !== 'tncDetected') return false;
+
+        const tabId = sender.tab?.id;
+        if (tabId === undefined) return false;
+
+        (async () => {
+            try {
+                const analysis = await fetchAnalysis({
+                    documentKey: msg.documentKey,
+                    url: msg.url,
+                    title: msg.title,
+                    text: msg.text,
+                    contentHash: msg.contentHash,
                 });
-        }
 
-        return true;
+                setBadge(tabId, true);
+                await storeForTab(tabId, analysis);
+                chrome.tabs.sendMessage(tabId, { action: 'showBanner', analysis }).catch(() => {});
+                notify(tabId, analysis);
+            } catch (error) {
+                console.error('[Background] Analysis failed:', error);
+                setBadge(tabId, false);
+                await storeForTab(tabId, {
+                    error: true,
+                    message: error.message || 'Backend unreachable',
+                    url: msg.url,
+                });
+            }
+        })();
+
+        return false;
     });
+
+    chrome.notifications.onClicked.addListener((notificationId) => {
+        const tabId = notificationTabs.get(notificationId);
+        notificationTabs.delete(notificationId);
+        chrome.notifications.clear(notificationId);
+        if (tabId === undefined) return;
+
+        chrome.tabs.update(tabId, { active: true }).catch(() => {});
+        chrome.action.openPopup().catch(() => {});
+    });
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === 'loading' && changeInfo.url) {
+        chrome.action.setBadgeText({ tabId, text: '' });
+        chrome.storage.local.remove(`tab:${tabId}`);
+    }
 });

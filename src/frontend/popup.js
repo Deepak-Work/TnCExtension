@@ -1,92 +1,90 @@
-function parseSections(text) {
-    const sections = { important: '', obligations: '', redFlags: '', greenFlags: '' };
-    const order = ['important', 'obligations', 'redFlags', 'greenFlags'];
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
-    // Match "1.  **Any Header**\ncontent" or "1. Any Header\ncontent"
-    // Stop at the next numbered section or end of string
-    const sectionRegex = /\n?(\d+)\.\s+[^\n]+\n([\s\S]*?)(?=\n\d+\.\s|$)/g;
-    let match;
+function bulletList(items, emptyLabel) {
+    if (!items || items.length === 0) {
+        return `<em style="color:#94a3b8;">${emptyLabel}</em>`;
+    }
+    return `<ul style="margin:0; padding-left:18px;">${items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>`;
+}
 
-    while ((match = sectionRegex.exec(text)) !== null) {
-        const num = parseInt(match[1], 10);
-        if (num >= 1 && num <= 4) {
-            const content = match[2]
-                .replace(/^[ \t]*[-*][ \t]+/gm, '')  // strip markdown bullet markers
-                .replace(/\*\*/g, '')                  // strip bold markers
-                .trim();
-            sections[order[num - 1]] = content;
-        }
+function sentimentList(items) {
+    if (!items || items.length === 0) {
+        return `<em style="color:#94a3b8;">No web sentiment found.</em>`;
+    }
+    return items.map(s => `
+        <div style="margin-bottom:8px;">
+            "${escapeHtml(s.text)}" —
+            <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">source</a>
+        </div>
+    `).join('');
+}
+
+function showScreen(name) {
+    document.getElementById('loading-screen').style.display = name === 'loading' ? 'flex' : 'none';
+    document.getElementById('empty-screen').style.display = name === 'empty' ? 'flex' : 'none';
+    document.getElementById('content').style.display = name === 'content' ? 'block' : 'none';
+}
+
+function render(data) {
+    if (data.error) {
+        showScreen('content');
+        document.getElementById('page-title').innerText = 'Terms Summary';
+        document.getElementById('url').innerText = data.url || '';
+        document.getElementById('error-message').innerText =
+            'Could not connect to backend. Make sure the servers are running.';
+        document.getElementById('error-message').style.display = 'block';
+        document.getElementById('good').innerHTML = '';
+        document.getElementById('bad').innerHTML = '';
+        document.getElementById('sentiment').innerHTML = '';
+        document.getElementById('meta').innerText = '';
+        return;
     }
 
-    return sections;
+    showScreen('content');
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('page-title').innerText = data.title ? `Terms Summary: ${data.title}` : 'Terms Summary';
+    document.getElementById('url').innerText = data.url || '';
+    document.getElementById('good').innerHTML = bulletList(data.good, 'No notable upsides found.');
+    document.getElementById('bad').innerHTML = bulletList(data.bad, 'No red flags found.');
+    document.getElementById('sentiment').innerHTML = sentimentList(data.sentiment);
+
+    const sourceLabel = data.source === 'cache' ? 'Loaded from cache' : 'Freshly analyzed';
+    const analyzedAt = data.analyzedAt ? new Date(data.analyzedAt).toLocaleString() : '';
+    document.getElementById('meta').innerText = `${sourceLabel}${analyzedAt ? ' · ' + analyzedAt : ''}`;
 }
 
-function showLoading(show = true) {
-    document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
-    document.getElementById('content').style.display = show ? 'none' : 'block';
+async function updatePopupContent() {
+    showScreen('loading');
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) {
+        showScreen('empty');
+        return;
+    }
+
+    const key = `tab:${tab.id}`;
+    const stored = await chrome.storage.local.get(key);
+    const data = stored[key];
+
+    if (!data) {
+        showScreen('empty');
+        return;
+    }
+
+    render(data);
 }
 
-function normalizeUrl(url) {
-    return url ? url.split('#')[0] : url;
-}
-
-function updatePopupContent() {
-    showLoading(true);
-
-    chrome.storage.local.get('tncSummary', (data) => {
-        const container = data.tncSummary;
-
-        if (!container) {
-            document.getElementById("url").innerText = "Analyzing new page...";
-            document.getElementById("important").innerText = "No important points found.";
-            showLoading(false);
-            return;
-        }
-
-        // Handle backend error state
-        if (container.error === true) {
-            document.getElementById("url").innerText = container.url || '';
-            document.getElementById("error-message").innerText =
-                "Could not connect to backend. Make sure the servers are running.";
-            document.getElementById("error-message").style.display = 'block';
-            document.getElementById("important").innerText = '';
-            document.getElementById("obligations").innerText = '';
-            document.getElementById("redFlags").innerText = '';
-            document.getElementById("greenFlags").innerText = '';
-            showLoading(false);
-            return;
-        }
-
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const currentTab = tabs[0];
-            if (normalizeUrl(currentTab.url) === normalizeUrl(container.url)) {
-                document.getElementById("error-message").style.display = 'none';
-                document.getElementById("url").innerText = container.url;
-                const parsed = parseSections(container.summary);
-
-                document.getElementById("important").innerText = parsed.important || "No important points found.";
-                document.getElementById("obligations").innerText = parsed.obligations || "No obligations found.";
-                document.getElementById("redFlags").innerText = parsed.redFlags || "No red flags found.";
-                document.getElementById("greenFlags").innerText = parsed.greenFlags || "No green flags found.";
-            } else {
-                document.getElementById("url").innerText = "Analyzing new page...";
-            }
-            showLoading(false);
-        });
-    });
-}
-
-// Initial load
 document.addEventListener('DOMContentLoaded', updatePopupContent);
 
-// Listen for summary updates from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'summaryUpdated') {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            const currentTab = tabs[0];
-            if (normalizeUrl(currentTab.url) === normalizeUrl(message.data.url)) {
-                updatePopupContent();
-            }
-        });
-    }
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.action !== 'analysisUpdated') return;
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+        if (tab && tab.id === message.tabId) {
+            render(message.data);
+        }
+    });
 });

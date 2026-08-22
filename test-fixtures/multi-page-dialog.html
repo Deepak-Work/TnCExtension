@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Multi-page T&C dialog fixture</title>
+    <style>
+        .tab-panel[hidden] { display: none; }
+        .modal { border: 1px solid #ccc; padding: 16px; max-width: 500px; }
+    </style>
+</head>
+<body>
+    <h1>Regular page content (not T&C - detection should ignore this)</h1>
+    <p>Welcome to our site. Check out our latest products below.</p>
+
+    <!-- Pattern A: tab/accordion dialog - every page already exists in the DOM,
+         inactive panels are just CSS-hidden. No clicking required to read them. -->
+    <div id="tab-dialog" class="modal" role="dialog" aria-modal="true">
+        <div class="tab-panel" data-tab="1">
+            By creating an account you agree to these terms of service and the
+            accompanying user agreement governing your use of this product.
+        </div>
+        <div class="tab-panel" data-tab="2" hidden>
+            This section covers binding arbitration and a class action waiver.
+            You waive certain rights and agree to indemnify us for third party
+            claims. Liability is limited as described under the governing law
+            of this jurisdiction, and this disclaimer applies to all warranties.
+        </div>
+        <div class="tab-panel" data-tab="3" hidden>
+            Data collection: we collect usage data and may share it with third
+            party partners. See our privacy policy for full details on
+            termination and data retention practices.
+        </div>
+    </div>
+
+    <!-- Pattern B: click-through wizard - page 2 genuinely does not exist in the
+         DOM until the user clicks Next. Extraction must never auto-click this;
+         it should only pick up page 2 once a real click event fires. -->
+    <div id="wizard-dialog" class="modal" role="dialog" aria-modal="true">
+        <div id="wizard-content">
+            <p data-page="1">
+                Page 1 of 2: these terms and conditions govern your use of the
+                service. You agree to be bound by this user agreement and its
+                policy on termination for any violation of these terms.
+            </p>
+        </div>
+        <button id="wizard-next">Next</button>
+    </div>
+
+    <script>
+        document.getElementById('wizard-next').addEventListener('click', () => {
+            const page2 = document.createElement('p');
+            page2.setAttribute('data-page', '2');
+            page2.textContent = 'Page 2 of 2: this part covers arbitration, ' +
+                'jurisdiction, warrant obligations, and liability limits that ' +
+                'you waive by agreeing to be bound under the governing law ' +
+                'referenced above.';
+            document.getElementById('wizard-content').appendChild(page2);
+        });
+    </script>
+</body>
+</html>

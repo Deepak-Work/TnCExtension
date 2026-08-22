@@ -13,9 +13,13 @@
             <p>Analyzing Terms & Conditions...</p>
         </div>
 
+        <div id="empty-screen" class="loading-container" style="display: none;">
+            <p>No Terms & Conditions detected on this page yet.</p>
+        </div>
+
         <div id="content" class="container" style="display: none;">
-            <h1 class="title">Terms Summary</h1>
-            
+            <h1 class="title" id="page-title">Terms Summary</h1>
+
             <div class="section">
                 <div class="label">Page URL</div>
                 <div id="url" class="box"></div>
@@ -24,25 +28,24 @@
             <div id="error-message" class="box warning" style="display: none;"></div>
 
             <div class="section">
-                <div class="label">Important Points</div>
-                <div id="important" class="box"></div>
+                <div class="label">Good for you</div>
+                <div id="good" class="box success"></div>
             </div>
 
             <div class="section">
-                <div class="label">User Obligations</div>
-                <div id="obligations" class="box"></div>
+                <div class="label">Red flags</div>
+                <div id="bad" class="box warning"></div>
             </div>
 
             <div class="section">
-                <div class="label">Red Flags</div>
-                <div id="redFlags" class="box warning"></div>
+                <div class="label">What people are saying</div>
+                <div id="sentiment" class="box"></div>
             </div>
 
             <div class="section">
-                <div class="label">Green Flags</div>
-                <div id="greenFlags" class="box success"></div>
+                <div id="meta" class="box" style="font-size: 12px; color: #64748b;"></div>
             </div>
         </div>
-        <script src="../popup.js"></script>
+        <script src="../popup.js" type="module"></script>
     </body>
 </html>
