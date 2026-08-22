@@ -42,6 +42,8 @@ function showScreen(name) {
 function render(data) {
     if (data.error) {
         showScreen('error');
+        document.getElementById('error-message').innerText =
+            data.message || "Couldn't reach the analysis service. Make sure the local backend is running.";
         return;
     }
 

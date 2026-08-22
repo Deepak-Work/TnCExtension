@@ -6,13 +6,24 @@ loadConfig().then(config => {
     const cacheCheckEndpoint = config.cacheCheckEndpoint;
     const analyzeEndpoint = config.analyzeEndpoint;
 
+    async function extractErrorMessage(res, fallback) {
+        try {
+            const body = await res.json();
+            return body.error || fallback;
+        } catch {
+            return fallback;
+        }
+    }
+
     async function fetchAnalysis(payload) {
         const checkRes = await fetch(cacheCheckEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ documentKey: payload.documentKey, contentHash: payload.contentHash }),
         });
-        if (!checkRes.ok) throw new Error(`Cache check returned ${checkRes.status}`);
+        if (!checkRes.ok) {
+            throw new Error(await extractErrorMessage(checkRes, `Cache check returned ${checkRes.status}`));
+        }
         const checkData = await checkRes.json();
         if (checkData.hit) return checkData.analysis;
 
@@ -21,7 +32,9 @@ loadConfig().then(config => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
         });
-        if (!analyzeRes.ok) throw new Error(`Analyze returned ${analyzeRes.status}`);
+        if (!analyzeRes.ok) {
+            throw new Error(await extractErrorMessage(analyzeRes, `Analyze returned ${analyzeRes.status}`));
+        }
         return await analyzeRes.json();
     }
 

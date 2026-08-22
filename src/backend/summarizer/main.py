@@ -60,6 +60,16 @@ async def cache_check(body: CacheCheckRequest):
     return {"hit": False}
 
 
+def _friendly_error_message(e: Exception) -> str:
+    text = str(e)
+    if "RESOURCE_EXHAUSTED" in text or "quota" in text.lower() or "429" in text:
+        return (
+            f"{LLM_PROVIDER} API quota exceeded for today. Wait for the quota to reset, "
+            f"switch GEMINI_MODEL/LLM_PROVIDER in .env, or use a different API key."
+        )
+    return text
+
+
 @app.post("/analyze")
 async def analyze(body: AnalyzeRequest):
     try:
@@ -80,4 +90,4 @@ async def analyze(body: AnalyzeRequest):
         return _cached_row_to_response(row, "fresh")
     except Exception as e:
         traceback.print_exc()
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return JSONResponse(status_code=500, content={"error": _friendly_error_message(e)})
