@@ -1,6 +1,5 @@
 {
     "manifest_version": 3,
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAowS04iDgR2zSV/3I46+eSFUItRPINbEONnWgulBjQ1im+z2FBV0DeaWywv/AWLP1sFuGylvjsfNV4WjPVICSHY9HZbUa7oZujnVO8TqhV0IPatAejcpD1r5m24JrSRR2GqJOk88/MLbe6q4MK4TDAFpWsva1rzOyY/DwWU5vLROlh+89FxGWVL+Cy/w/lCtX0uNaDiEN/UCwbX/CJmYXHs/bLUo3zfZpC+c9MQb9xHRIQt+mcqKpz9WEZksHKN5fzWn9o0a7M2Wko5eC7DUylKhOuxkWrzCGFuxNLKiWlxQsHjqqPYh5txJCzdvWh1KHILJoTpVyPouyEItB5fC/UQIDAQAB",
     "name": "Fine Print",
     "description": "Summarizes Terms & Conditions into clear benefits, risks, and public sentiment before you agree.",
     "version": "1.0",
