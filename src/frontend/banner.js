@@ -4,10 +4,10 @@ const STYLES = `
     :host { all: initial; }
     .card {
         position: fixed;
-        bottom: 20px;
-        right: 20px;
+        top: 24px;
+        right: 24px;
         width: 340px;
-        max-height: 80vh;
+        max-height: 30vh;
         overflow-y: auto;
         z-index: 2147483647;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
