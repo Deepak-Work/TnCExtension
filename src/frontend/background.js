@@ -53,7 +53,7 @@ loadConfig().then(config => {
         notificationTabs.set(notificationId, tabId);
         chrome.notifications.create(notificationId, {
             type: 'basic',
-            iconUrl: chrome.runtime.getURL('src/frontend/public/icons/icon.png'),
+            iconUrl: chrome.runtime.getURL('src/frontend/public/icons/icon128.png'),
             title: 'Terms Summary ready',
             message: analysis.title ? `Analysis ready for ${analysis.title}` : 'Analysis ready for this page.',
         });

@@ -4,7 +4,7 @@
     "description": "Summarizes Terms & Conditions into clear benefits, risks, and public sentiment before you agree.",
     "version": "1.0",
     "permissions": [
-        "activeTab","scripting", "storage", "notifications"
+        "activeTab", "storage", "notifications"
     ],
     "host_permissions": [
       "<all_urls>"
@@ -19,12 +19,17 @@
             "js": ["src/frontend/content.js"]
         }
     ],
+    "icons": {
+        "16": "src/frontend/public/icons/icon16.png",
+        "48": "src/frontend/public/icons/icon48.png",
+        "128": "src/frontend/public/icons/icon128.png"
+    },
     "action": {
         "default_popup": "src/frontend/public/popup.html",
         "default_icon": {
-            "16" : "src/frontend/public/icons/icon.png",
-            "48" : "src/frontend/public/icons/icon.png",
-            "128" : "src/frontend/public/icons/icon.png"
+            "16" : "src/frontend/public/icons/icon16.png",
+            "48" : "src/frontend/public/icons/icon48.png",
+            "128" : "src/frontend/public/icons/icon128.png"
         }
     },
     "web_accessible_resources": [

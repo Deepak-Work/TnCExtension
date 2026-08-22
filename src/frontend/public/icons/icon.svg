@@ -1,0 +1,28 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5B4FE9"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="128" height="128" rx="26" fill="url(#bg)"/>
+
+  <!-- document -->
+  <g>
+    <path d="M34 22 H76 L90 36 V102 A6 6 0 0 1 84 108 H34 A6 6 0 0 1 28 102 V28 A6 6 0 0 1 34 22 Z" fill="#FFFFFF"/>
+    <path d="M76 22 L90 36 H80 A4 4 0 0 1 76 32 Z" fill="#D9D3FB"/>
+
+    <!-- text lines -->
+    <rect x="40" y="48" width="38" height="6" rx="3" fill="#C7CBE0"/>
+    <rect x="40" y="62" width="30" height="6" rx="3" fill="#C7CBE0"/>
+    <!-- flagged clause -->
+    <rect x="40" y="76" width="38" height="7" rx="3.5" fill="#FB7185"/>
+  </g>
+
+  <!-- magnifying glass -->
+  <g>
+    <circle cx="82" cy="80" r="19" fill="#5B4FE9" stroke="#FFFFFF" stroke-width="6"/>
+    <rect x="93.5" y="93.5" width="12" height="17" rx="5" transform="rotate(45 93.5 93.5)" fill="#FFFFFF"/>
+  </g>
+</svg>
