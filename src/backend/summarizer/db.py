@@ -14,10 +14,17 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 
 # Small pool sized for a serverless container - Postgres has a hard connection cap
 # and multiple Cloud Run instances can spin up concurrently, so this stays modest.
+# min_size=0 avoids holding a connection open across Cloud Run's idle/scale-to-zero
+# gaps, and check=check_connection validates a pooled connection is still alive
+# before handing it out - Neon's pooler closes idle connections server-side, and
+# without this check psycopg would hand back a dead connection and raise
+# "SSL connection has been closed unexpectedly" instead of transparently reconnecting.
 pool = ConnectionPool(
     conninfo=DATABASE_URL,
-    min_size=1,
+    min_size=0,
     max_size=5,
+    max_idle=120,
+    check=ConnectionPool.check_connection,
     kwargs={"row_factory": dict_row},
 )
 
