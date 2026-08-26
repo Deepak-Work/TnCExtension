@@ -2,14 +2,20 @@
 // so extractor.js/banner.js are loaded via dynamic import() instead of a static
 // import - they're exposed as web_accessible_resources for exactly this purpose.
 (async () => {
-    const {
-        extractAllText,
-        isTncCandidate,
-        sha256Hex,
-        computeDocumentKey,
-        PassiveAccumulator,
-    } = await import(chrome.runtime.getURL('src/frontend/extractor.js'));
-    const { showBanner } = await import(chrome.runtime.getURL('src/frontend/banner.js'));
+    let extractAllText, isTncCandidate, sha256Hex, computeDocumentKey, PassiveAccumulator, showBanner;
+    try {
+        ({
+            extractAllText,
+            isTncCandidate,
+            sha256Hex,
+            computeDocumentKey,
+            PassiveAccumulator,
+        } = await import(chrome.runtime.getURL('src/frontend/extractor.js')));
+        ({ showBanner } = await import(chrome.runtime.getURL('src/frontend/banner.js')));
+    } catch (error) {
+        console.error('[Fine Print] Failed to load extractor/banner modules - detection disabled on this page:', error);
+        return;
+    }
 
     const TNC_KEYWORDS = ['terms', 'privacy', 'policy', 'conditions', 'agreement', 'legal'];
     const SEARCH_ENGINE_HOSTS = [

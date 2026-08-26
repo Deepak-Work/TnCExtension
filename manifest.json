@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Fine Print",
     "description": "Summarizes Terms & Conditions into clear benefits, risks, and public sentiment before you agree.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "permissions": [
         "activeTab", "storage", "notifications"
     ],

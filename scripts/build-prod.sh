@@ -22,6 +22,7 @@ mkdir -p "$OUT_DIR/src/frontend" "$OUT_DIR/config"
 
 cp manifest.json "$OUT_DIR/"
 cp -R src/frontend/. "$OUT_DIR/src/frontend/"
+cp config/configLoader.js "$OUT_DIR/config/configLoader.js"
 cp "$PROD_CONFIG" "$OUT_DIR/config/config.json"
 
 cd "$OUT_DIR"
